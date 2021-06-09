@@ -8,6 +8,22 @@
 
 - Burp relies on Jython to provide its Python support. You will need to download the "Standalone Jar" version.
 - Select this directory in Burp suite's "Python environment" which can be reached from "Extender" -> "Options".
-- Download the latest release from releases and load it into Burp by going to "Extender" -> "Extensions" -> click "Add" and select the downloaded extension JAR file.
+
+## How to Build
+### inellij
+If you use IntelliJ IDEA, you can build it by following `Build` -> `Build Artifacts` -> `LazyCSRF:jar` -> `Build`.
+
+### Command line
+
+```
+$ maven install
+```
 
 ## Usage
+
+
+## LICENSE
+
+GPLv3 - GNU General Public License, version 3
+
+Copyright (C) 2021 tkmru
