@@ -6,8 +6,6 @@
 
 ## Installation
 
-- Burp relies on Jython to provide its Python support. You will need to download the "Standalone Jar" version.
-- Select this directory in Burp suite's "Python environment" which can be reached from "Extender" -> "Options".
 
 ## How to Build
 ### inellij
