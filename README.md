@@ -5,7 +5,7 @@
 - Support GraphQL Request（TODO）
 
 ## Installation
-
+In Burp, go to the Extender tool, and the Extensions tab, and add a new extension. Select the extension type `Java`, and specify the location of your JAR file.
 
 ## How to Build
 ### inellij
@@ -14,7 +14,7 @@ If you use IntelliJ IDEA, you can build it by following `Build` -> `Build Artifa
 ### Command line
 
 ```
-$ maven install
+$ mvn install
 ```
 
 ## Usage

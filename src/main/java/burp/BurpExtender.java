@@ -5,24 +5,16 @@ import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
 
-import java.awt.Component;
+import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-public class BurpExtender implements IBurpExtender, IContextMenuFactory, ITab
+public class BurpExtender implements IBurpExtender, IContextMenuFactory
 {
 
     private IContextMenuInvocation menuInvocation;
     private IBurpExtenderCallbacks burpCallbacks;
     private PrintWriter stdout;
-
-    private JPanel jPanel1;
-    private JButton jButton1;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
@@ -33,23 +25,6 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory, ITab
 
         stdout = new PrintWriter(this.burpCallbacks.getStdout(), true);
         stdout.println("INFO : Hello from LazyCSRF");
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                 //Create a JPanel
-                 jPanel1 = new JPanel();
-                 jButton1 = new JButton("click me");
- 
-                 // add the button to the panel
-                 jPanel1.add(jButton1);
- 
-                 //Customized UI components
-                 callbacks.customizeUiComponent(jPanel1);
-                 //Add custom tabs to Burp UI
-                 callbacks.addSuiteTab(BurpExtender.this);
-            }
-        });
     }
     
     @Override
@@ -65,6 +40,9 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory, ITab
                 public void actionPerformed(ActionEvent arg0) {
                     if(arg0.getActionCommand().equals("Generate Better CSRF PoC")) {
                         GeneratePoC(menuInvocation.getSelectedMessages());
+                        CSRFPoCWindow view = new CSRFPoCWindow("LazyCSRF");
+                        view.setVisible();
+                        view.setCSRFPoCHTML("aaaaaaaaa");
                    }
                }
             });
@@ -76,23 +54,25 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory, ITab
     
     private void GeneratePoC(IHttpRequestResponse[] messages)
     {
+        String firstHalfPoCTemplate = new StringBuilder()
+                .append("<html>\n")
+                .append("<body>\n")
+                .append("  <script>history.pushState('', '', '/')</script>\n")
+                .append("  <form action=\"target-url\">\n")
+                .toString();
+
+        String latterHalfPoCTemplate = new StringBuilder()
+                .append("    <input type=\"submit\" value=\"Submit request\" />\n")
+                .append("  </form>\n")
+                .append("</body>\n")
+                .append("</html>\n")
+                .toString();
+        
         for(int i=0; i < messages.length; i++) {
             stdout.println(messages[i].getHttpService().getProtocol());
             stdout.println(messages[i].getHttpService().getHost());
             stdout.println(messages[i].getHttpService().getPort());
             stdout.println(messages[i].getRequest());
         }
-    }
-
-    @Override
-    public String getTabCaption() {
-        // Return the title of the custom tab page
-        return "LazyCSRF PoC";
-    }
- 
-    @Override
-    public Component getUiComponent() {
-        // Return the component object of the panel in the custom tab
-        return jPanel1;
     }
 }
