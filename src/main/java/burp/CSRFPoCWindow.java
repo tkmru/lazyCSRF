@@ -16,6 +16,8 @@ public class CSRFPoCWindow {
     private JFrame frame;
     private JPanel mainPanel;
     private JScrollPane mainScrollPane;
+    private JScrollPane csrfPoCScrollPane;
+
 
     public CSRFPoCWindow(String title) {
         initialize(title);
@@ -41,13 +43,16 @@ public class CSRFPoCWindow {
 
             csrfPoCTextPane = new JTextPane();
             csrfPoCTextPane.getDocument().putProperty("name", "CSRF PoC");
-            csrfPoCTextPane.setBounds(12, 35, 650, 200);
+            csrfPoCTextPane.setBounds(12, 35, 650, 600);
+            csrfPoCScrollPane = new JScrollPane(csrfPoCTextPane);
+            csrfPoCScrollPane.setBounds(12, 35, 650, 600);
 
             copyHTMLButton = new JButton("Copy PoC HTML");
             copyHTMLButton.setBounds(12, 765, 150, 25);
 
             mainPanel.add(csrfPoCLabel);
-            mainPanel.add(csrfPoCTextPane);
+            mainPanel.add(csrfPoCScrollPane);
+            //mainPanel.add(csrfPoCTextPane);
             mainPanel.add(copyHTMLButton);
 
         }

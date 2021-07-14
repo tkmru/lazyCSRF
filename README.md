@@ -1,8 +1,7 @@
 # LazyCSRF
 
-- Support JSON parameter（TODO）
-- Supoort PUT/DELETE（TODO）
-- Support GraphQL Request（TODO）
+- Support JSON parameter（like GraphQL Request）
+- Support PUT/DELETE（only work with CORS enabled with an unrestrictive policy.）
 
 ## Installation
 In Burp, go to the Extender tool, and the Extensions tab, and add a new extension. Select the extension type `Java`, and specify the location of your JAR file.
