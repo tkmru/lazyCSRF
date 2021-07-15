@@ -1,21 +1,20 @@
 package burp;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.JTextPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.Dimension;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 
 public class CSRFPoCWindow {
 
     private JButton copyHTMLButton;
     private JLabel csrfPoCLabel;
+    private JLabel requestLabel;
+    private JTextPane requestTextPane;
     private JTextPane csrfPoCTextPane;
     private JFrame frame;
     private JPanel mainPanel;
     private JScrollPane mainScrollPane;
+    private JScrollPane requestScrollPane;
     private JScrollPane csrfPoCScrollPane;
 
 
@@ -26,7 +25,7 @@ public class CSRFPoCWindow {
     private void initialize(String title) {
         frame = new JFrame();
         frame.setTitle(title);
-        frame.setBounds(100, 100, 675, 825);
+        frame.setBounds(100, 100, 775, 825);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainScrollPane = new JScrollPane(getMainPanel());
         frame.getContentPane().add(mainScrollPane);
@@ -35,26 +34,44 @@ public class CSRFPoCWindow {
     private JPanel getMainPanel() {
         if (mainPanel == null) {
             mainPanel = new JPanel();
-            mainPanel.setPreferredSize(new Dimension(650, 800));
-            mainPanel.setLayout(null);
+            mainPanel.setPreferredSize(new Dimension(750, 800));
+            mainPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+            mainPanel.setBorder(BorderFactory.createEmptyBorder(11, 4, 11, 9));
+
+            requestLabel = new JLabel("Request to: ");
+            requestLabel.setAlignmentX(0.0f);
+
+            requestTextPane = new JTextPane();
+            requestTextPane.getDocument().putProperty("name", "Request");
+            requestScrollPane = new JScrollPane(requestTextPane);
+            requestScrollPane.setBorder(new LineBorder(Color.GRAY, 1, true));
+            requestScrollPane.setPreferredSize(new Dimension(730, 200));
+            requestScrollPane.setMaximumSize(new Dimension(Short.MAX_VALUE, 200));
+            requestScrollPane.setAlignmentX(0.0f);
 
             csrfPoCLabel = new JLabel("CSRF HTML PoC:");
-            csrfPoCLabel.setBounds(12, 10, 150, 15);
+            csrfPoCLabel.setAlignmentX(0.0f);
 
             csrfPoCTextPane = new JTextPane();
             csrfPoCTextPane.getDocument().putProperty("name", "CSRF PoC");
-            csrfPoCTextPane.setBounds(12, 35, 650, 600);
             csrfPoCScrollPane = new JScrollPane(csrfPoCTextPane);
-            csrfPoCScrollPane.setBounds(12, 35, 650, 600);
+            csrfPoCScrollPane.setBorder(new LineBorder(Color.GRAY, 1, true));
+            csrfPoCScrollPane.setAlignmentX(0.0f);
 
             copyHTMLButton = new JButton("Copy PoC HTML");
-            copyHTMLButton.setBounds(12, 765, 150, 25);
+            copyHTMLButton.setAlignmentX(0.0f);
 
+            mainPanel.add(requestLabel);
+            mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
+            mainPanel.add(requestTextPane);
+            mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
             mainPanel.add(csrfPoCLabel);
+            mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
             mainPanel.add(csrfPoCScrollPane);
-            //mainPanel.add(csrfPoCTextPane);
+            mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
             mainPanel.add(copyHTMLButton);
-
+            mainPanel.revalidate();
         }
         return mainPanel;
     }
@@ -63,8 +80,19 @@ public class CSRFPoCWindow {
         frame.setVisible(true);
     }
 
+    public void setRequest(String request) {
+        requestTextPane.setText(request);
+    }
+
+    public void setRequestLabel(String url) {
+        requestLabel.setText(new StringBuilder()
+                .append("Request to: ")
+                .append(url)
+                .toString()
+        );
+    }
+
     public void setCSRFPoCHTML(String html) {
-        if(html == null) return;
         csrfPoCTextPane.setText(html);
     }
 }

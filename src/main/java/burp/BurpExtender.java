@@ -40,7 +40,9 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
                         for (IHttpRequestResponse req : selectedMessages) {
                             CSRFPoCWindow view = new CSRFPoCWindow("LazyCSRF");
                             view.setVisible();
-                            view.setCSRFPoCHTML(GeneratePoC(req));
+                            String[] pocTexts = GeneratePoC(req);
+                            view.setRequestLabel(pocTexts[0]);
+                            view.setCSRFPoCHTML(pocTexts[1]);
                         }
                    }
                }
@@ -50,12 +52,13 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         return menuList;
     }
     
-    private String GeneratePoC(IHttpRequestResponse req)
+    private String[] GeneratePoC(IHttpRequestResponse req)
     {
         IExtensionHelpers iexHelpers = this.burpCallbacks.getHelpers();
         IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
         String method = reqInfo.getMethod();
         String body = iexHelpers.bytesToString(req.getRequest()).substring(reqInfo.getBodyOffset());
+        String url = reqInfo.getUrl().toString();
 
         StringBuilder PoCBuilder = new StringBuilder()
                 .append("<html>\n")
@@ -64,7 +67,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
                 .append("<script>\n")
                 .append("$.ajax({\n")
                 .append("  url: '")
-                .append(reqInfo.getUrl())
+                .append(url)
                 .append("',\n")
                 .append("  type: '")
                 .append(method)
@@ -92,7 +95,8 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
                 .append("</body>\n")
                 .append("</html>\n");
 
-        return PoCBuilder.toString();
+        String[] pocTexts = {url, PoCBuilder.toString()};
+        return pocTexts;
     }
 
     private boolean isJSON(String json) {
