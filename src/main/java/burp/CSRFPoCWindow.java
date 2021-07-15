@@ -17,7 +17,6 @@ public class CSRFPoCWindow {
     private JScrollPane requestScrollPane;
     private JScrollPane csrfPoCScrollPane;
 
-
     public CSRFPoCWindow(String title) {
         initialize(title);
     }
@@ -25,7 +24,7 @@ public class CSRFPoCWindow {
     private void initialize(String title) {
         frame = new JFrame();
         frame.setTitle(title);
-        frame.setBounds(100, 100, 775, 825);
+        frame.setBounds(100, 100, 775, 900);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainScrollPane = new JScrollPane(getMainPanel());
         frame.getContentPane().add(mainScrollPane);
@@ -34,10 +33,10 @@ public class CSRFPoCWindow {
     private JPanel getMainPanel() {
         if (mainPanel == null) {
             mainPanel = new JPanel();
-            mainPanel.setPreferredSize(new Dimension(750, 800));
+            mainPanel.setPreferredSize(new Dimension(750, 875));
             mainPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-            mainPanel.setBorder(BorderFactory.createEmptyBorder(11, 4, 11, 9));
+            mainPanel.setBorder(BorderFactory.createEmptyBorder(11, 4, 11, 8));
 
             requestLabel = new JLabel("Request to: ");
             requestLabel.setAlignmentX(0.0f);
@@ -46,8 +45,8 @@ public class CSRFPoCWindow {
             requestTextPane.getDocument().putProperty("name", "Request");
             requestScrollPane = new JScrollPane(requestTextPane);
             requestScrollPane.setBorder(new LineBorder(Color.GRAY, 1, true));
-            requestScrollPane.setPreferredSize(new Dimension(730, 200));
-            requestScrollPane.setMaximumSize(new Dimension(Short.MAX_VALUE, 200));
+            requestScrollPane.setPreferredSize(new Dimension(730, 250));
+            requestScrollPane.setMaximumSize(new Dimension(Short.MAX_VALUE, 250));
             requestScrollPane.setAlignmentX(0.0f);
 
             csrfPoCLabel = new JLabel("CSRF HTML PoC:");
@@ -64,7 +63,7 @@ public class CSRFPoCWindow {
 
             mainPanel.add(requestLabel);
             mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
-            mainPanel.add(requestTextPane);
+            mainPanel.add(requestScrollPane);
             mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
             mainPanel.add(csrfPoCLabel);
             mainPanel.add(Box.createRigidArea(new Dimension(10,8)));

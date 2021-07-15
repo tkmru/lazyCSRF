@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
     private IContextMenuInvocation menuInvocation;
     private IBurpExtenderCallbacks burpCallbacks;
     private PrintWriter stdout;
+    private IExtensionHelpers iexHelpers;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
@@ -20,6 +22,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         this.burpCallbacks = callbacks;
         this.burpCallbacks.setExtensionName("LazyCSRF");
         this.burpCallbacks.registerContextMenuFactory(this);
+        this.iexHelpers = this.burpCallbacks.getHelpers();
 
         stdout = new PrintWriter(this.burpCallbacks.getStdout(), true);
         stdout.println("INFO: Hello from LazyCSRF");
@@ -38,11 +41,17 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
                     if(arg0.getActionCommand().equals("Generate Better CSRF PoC")) {
                         IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
                         for (IHttpRequestResponse req : selectedMessages) {
+                            IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
                             CSRFPoCWindow view = new CSRFPoCWindow("LazyCSRF");
                             view.setVisible();
-                            String[] pocTexts = GeneratePoC(req);
-                            view.setRequestLabel(pocTexts[0]);
-                            view.setCSRFPoCHTML(pocTexts[1]);
+                            String pocText = GeneratePoC(req, reqInfo);
+                            view.setRequestLabel(reqInfo.getUrl().toString());
+                            view.setCSRFPoCHTML(pocText);
+                            String reqFullText = new StringBuilder()
+                                    .append(createHeaderText(reqInfo.getHeaders()))
+                                    .append(createBodyText(req.getRequest()))
+                                    .toString();
+                            view.setRequest(reqFullText);
                         }
                    }
                }
@@ -52,12 +61,10 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         return menuList;
     }
     
-    private String[] GeneratePoC(IHttpRequestResponse req)
+    private String GeneratePoC(IHttpRequestResponse req, IRequestInfo reqInfo)
     {
-        IExtensionHelpers iexHelpers = this.burpCallbacks.getHelpers();
-        IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
         String method = reqInfo.getMethod();
-        String body = iexHelpers.bytesToString(req.getRequest()).substring(reqInfo.getBodyOffset());
+        String body = this.iexHelpers.bytesToString(req.getRequest()).substring(reqInfo.getBodyOffset());
         String url = reqInfo.getUrl().toString();
 
         StringBuilder PoCBuilder = new StringBuilder()
@@ -95,8 +102,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
                 .append("</body>\n")
                 .append("</html>\n");
 
-        String[] pocTexts = {url, PoCBuilder.toString()};
-        return pocTexts;
+        return PoCBuilder.toString();
     }
 
     private boolean isJSON(String json) {
@@ -106,4 +112,32 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         }
         return false;
     }
+
+    private String createHeaderText(List<String> headers) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String header : headers) {
+            stringBuilder.append(header);
+            stringBuilder.append(System.lineSeparator());
+        }
+        return stringBuilder.toString();
+    }
+
+
+    private String createBodyText(byte[] bodyBytes) {
+        String req = "";
+        try {
+            req = new String(bodyBytes, "UTF-8");
+            req = req.substring(this.iexHelpers.analyzeResponse(bodyBytes).getBodyOffset());
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Error converting string");
+        }
+
+        if (req.length() > 0) {
+            req = System.lineSeparator() + req;
+            return req;
+        } else {
+            return "";
+        }
+    }
+
 }
