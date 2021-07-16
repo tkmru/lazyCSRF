@@ -16,6 +16,10 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
     private PrintWriter stdout;
     private IExtensionHelpers iexHelpers;
 
+    private static String JSON_CSRF_MENU_NAME = "Generate JSON CSRF PoC with Ajax";
+    private static String PUT_DELETE_CSRF_MENU_NAME = "Generate DELETE/PUT CSRF PoC with Ajax";
+    private static String NORMAL_CSRF_MENU_NAME = "Generate Normal CSRF PoC with Form";
+
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
     {
@@ -34,22 +38,22 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         List<JMenuItem> menuList = new ArrayList<>();
         menuInvocation = invocation;
         if(menuInvocation.getInvocationContext() == IContextMenuInvocation.CONTEXT_PROXY_HISTORY) {
-            JMenuItem GeneratePocButton = new JMenuItem("Generate Better CSRF PoC");
+            JMenuItem GeneratePocButton = new JMenuItem(JSON_CSRF_MENU_NAME);
             GeneratePocButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
-                    if(arg0.getActionCommand().equals("Generate Better CSRF PoC")) {
+                    if(arg0.getActionCommand().equals(JSON_CSRF_MENU_NAME)) {
                         IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
                         for (IHttpRequestResponse req : selectedMessages) {
                             IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
                             CSRFPoCWindow view = new CSRFPoCWindow("LazyCSRF");
                             view.setVisible();
-                            String pocText = GeneratePoC(req, reqInfo);
+                            String pocText = GenerateJSONPoC(req, reqInfo);
                             view.setRequestLabel(reqInfo.getUrl().toString());
                             view.setCSRFPoCHTML(pocText);
                             String reqFullText = new StringBuilder()
-                                    .append(createHeaderText(reqInfo.getHeaders()))
-                                    .append(createBodyText(req.getRequest()))
+                                    .append(parseHeaderText(reqInfo.getHeaders()))
+                                    .append(parseBodyText(req.getRequest()))
                                     .toString();
                             view.setRequest(reqFullText);
                         }
@@ -61,7 +65,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         return menuList;
     }
     
-    private String GeneratePoC(IHttpRequestResponse req, IRequestInfo reqInfo)
+    private String GenerateJSONPoC(IHttpRequestResponse req, IRequestInfo reqInfo)
     {
         String method = reqInfo.getMethod();
         String body = this.iexHelpers.bytesToString(req.getRequest()).substring(reqInfo.getBodyOffset());
@@ -88,7 +92,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         if (isJSON(body)) {
             PoCBuilder.append("  contentType: 'application/json; charset=utf-8',\n")
                     .append("  data: '")
-                    .append(body);
+                    .append(escapeParam(body));
         }
         PoCBuilder.append("',\n")
                 .append("  success: function (result) {\n")
@@ -113,7 +117,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         return false;
     }
 
-    private String createHeaderText(List<String> headers) {
+    private String parseHeaderText(List<String> headers) {
         StringBuilder stringBuilder = new StringBuilder();
         for (String header : headers) {
             stringBuilder.append(header);
@@ -122,8 +126,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         return stringBuilder.toString();
     }
 
-
-    private String createBodyText(byte[] bodyBytes) {
+    private String parseBodyText(byte[] bodyBytes) {
         String req = "";
         try {
             req = new String(bodyBytes, "UTF-8");
@@ -138,6 +141,11 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory
         } else {
             return "";
         }
+    }
+
+    private String escapeParam(String escape) {
+        return escape.replace("\\", "\\\\")
+                .replace("'", "\\'");
     }
 
 }
