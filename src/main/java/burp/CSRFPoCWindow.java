@@ -3,8 +3,12 @@ package burp;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class CSRFPoCWindow {
+public class CSRFPoCWindow implements ActionListener {
 
     private JButton copyHTMLButton;
     private JLabel csrfPoCLabel;
@@ -60,6 +64,8 @@ public class CSRFPoCWindow {
 
             copyHTMLButton = new JButton("Copy PoC HTML");
             copyHTMLButton.setAlignmentX(0.0f);
+            copyHTMLButton.addActionListener(this);
+            copyHTMLButton.setActionCommand("Copy PoC HTML");
 
             mainPanel.add(requestLabel);
             mainPanel.add(Box.createRigidArea(new Dimension(10,8)));
@@ -93,5 +99,13 @@ public class CSRFPoCWindow {
 
     public void setCSRFPoCHTML(String html) {
         csrfPoCTextPane.setText(html);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        String cmd = e.getActionCommand();
+        if (cmd.equals("Copy PoC HTML")) {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(new StringSelection(csrfPoCTextPane.getText()), null);
+        }
     }
 }
