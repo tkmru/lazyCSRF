@@ -1,6 +1,10 @@
 # LazyCSRF
 
 ## Motivation
+The feature of burp that I like the most is "Generate CSRF PoC". 
+However, this does not support JSON parameters. 
+It also uses the `<form>`, so it cannot send PUT/DELETE requests. 
+Those were the motivations for creating this extension.
 
 ## Features
 
@@ -13,7 +17,7 @@
 In Burp, go to the Extensions tab in the Extender tab, and add a new extension. Select the extension type `Java`, and specify the location of your JAR file.
 
 ## How to Build
-### inellij
+### intellij
 
 If you use IntelliJ IDEA, you can build it by following `Build` -> `Build Artifacts` -> `LazyCSRF:jar` -> `Build`.
 
@@ -25,9 +29,10 @@ $ mvn install
 
 ## Usage
 
+![menu](./img/menu.png)
 
 ## LICENSE
 
-GPLv3 - GNU General Public License, version 3
+MIT License
 
 Copyright (C) 2021 tkmru
