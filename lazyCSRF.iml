@@ -12,6 +12,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: net.portswigger.burp.extender:burp-extender-api:2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.json:json:20210307" level="project" />
   </component>
 </module>

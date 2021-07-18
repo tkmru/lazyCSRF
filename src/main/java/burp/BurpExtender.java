@@ -1,19 +1,21 @@
 package burp;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JMenuItem;
 
 public class BurpExtender implements IBurpExtender, IContextMenuFactory {
 
   private IContextMenuInvocation menuInvocation;
   private IBurpExtenderCallbacks burpCallbacks;
+  private IExtensionHelpers burpHelpers;
   private PrintWriter stdout;
-  private IExtensionHelpers iexHelpers;
+  private PrintWriter stderr;
 
   private static String EXTENSION_NAME = "LazyCSRF";
   private static String JSON_CSRF_MENU_NAME = "Generate JSON CSRF PoC with Ajax";
@@ -24,9 +26,10 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
     this.burpCallbacks = callbacks;
     this.burpCallbacks.setExtensionName(EXTENSION_NAME);
     this.burpCallbacks.registerContextMenuFactory(this);
-    this.iexHelpers = this.burpCallbacks.getHelpers();
+    this.burpHelpers = this.burpCallbacks.getHelpers();
 
     stdout = new PrintWriter(this.burpCallbacks.getStdout(), true);
+    stderr = new PrintWriter(this.burpCallbacks.getStderr(), true);
     stdout.println("INFO: Hello from LazyCSRF");
   }
 
@@ -51,10 +54,15 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
           if (arg0.getActionCommand().equals(JSON_CSRF_MENU_NAME)) {
             IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
             for (IHttpRequestResponse req : selectedMessages) {
-              IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
+              IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
               CSRFPoCWindow view = new CSRFPoCWindow(EXTENSION_NAME);
               view.setVisible();
-              String pocText = GenerateJSONPoC(req, reqInfo);
+              String pocText = null;
+              try {
+                pocText = GenerateJSONPoC(req, reqInfo);
+              } catch (UnsupportedEncodingException e) {
+                stderr.println("ERROR: Unsupported Encoding");
+              }
               view.setRequestLabel(reqInfo.getUrl().toString());
               view.setCSRFPoCHTML(pocText);
               String reqFullText = new StringBuilder()
@@ -75,10 +83,10 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
           if (arg0.getActionCommand().equals(FORM_CSRF_MENU_NAME)) {
             IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
             for (IHttpRequestResponse req : selectedMessages) {
-              IRequestInfo reqInfo = iexHelpers.analyzeRequest(req);
+              IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
               CSRFPoCWindow view = new CSRFPoCWindow(EXTENSION_NAME);
               view.setVisible();
-              String pocText = GenerateFormPoC(reqInfo);
+              String pocText = GenerateFormPoC(req, reqInfo);
               view.setRequestLabel(reqInfo.getUrl().toString());
               view.setCSRFPoCHTML(pocText);
               String reqFullText = new StringBuilder()
@@ -95,9 +103,10 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
     return menuList;
   }
 
-  private String GenerateJSONPoC(IHttpRequestResponse req, IRequestInfo reqInfo) {
+  private String GenerateJSONPoC(IHttpRequestResponse req, IRequestInfo reqInfo)
+      throws UnsupportedEncodingException {
     String method = reqInfo.getMethod();
-    String body = this.iexHelpers.bytesToString(req.getRequest())
+    String body = new String(req.getRequest(), StandardCharsets.UTF_8)
         .substring(reqInfo.getBodyOffset());
     String url = reqInfo.getUrl().toString();
 
@@ -136,9 +145,11 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
     return PoCBuilder.toString();
   }
 
-  private String GenerateFormPoC(IRequestInfo reqInfo) {
+  private String GenerateFormPoC(IHttpRequestResponse req, IRequestInfo reqInfo) {
     String method = reqInfo.getMethod();
     String url = reqInfo.getUrl().toString();
+    String body = new String(req.getRequest(), StandardCharsets.UTF_8)
+        .substring(reqInfo.getBodyOffset());
 
     StringBuilder PoCBuilder = new StringBuilder()
         .append("<html>\n")
@@ -146,16 +157,19 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
         .append("<form method=\"").append(method).append("\" action=\"").append(url)
         .append("\">\n");
 
-    List<IParameter> params = reqInfo.getParameters();
-
-    params.forEach((param) -> {
-      if (param.getType() == IParameter.PARAM_BODY) {
-        PoCBuilder.append("  <input type=\"hidden\" name=\"")
-            .append(encodeHTML(iexHelpers.urlDecode(param.getName())))
-            .append("\" value=\"").append(encodeHTML(iexHelpers.urlDecode(param.getValue())))
-            .append("\">\n");
+    String[] params = body.split("&");
+    for (String param : params) {
+      String[] paramPair = param.split("=");
+      String name = paramPair[0];
+      String value = "";
+      if (paramPair.length == 2) {
+        value = paramPair[1];
       }
-    });
+      PoCBuilder.append("  <input type=\"hidden\" name=\"")
+          .append(encodeHTML(burpHelpers.urlDecode(name)))
+          .append("\" value=\"").append(encodeHTML(value))
+          .append("\">\n");
+    }
 
     PoCBuilder.append("  <input type=\"submit\" value=\"Submit request\">\n")
         .append("</form>\n")
@@ -186,9 +200,9 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
     String req = "";
     try {
       req = new String(bodyBytes, "UTF-8");
-      req = req.substring(this.iexHelpers.analyzeResponse(bodyBytes).getBodyOffset());
+      req = req.substring(this.burpHelpers.analyzeResponse(bodyBytes).getBodyOffset());
     } catch (UnsupportedEncodingException e) {
-      System.out.println("Error converting string");
+      stderr.println("ERROR: Unsupported Encoding");
     }
 
     if (req.length() > 0) {
