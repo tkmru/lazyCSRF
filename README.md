@@ -11,6 +11,7 @@ Those were the motivations for creating this extension.
 - Generating CSRF PoC with Burp Community Edition (of course, it also works in Professional Edition)
 - Support JSON parameter (like GraphQL Request)
 - Support PUT/DELETE (only work with CORS enabled with an unrestrictive policy)
+- Support displaying multibyte characters(like Japanese)
 
 ## Installation
 
@@ -22,6 +23,8 @@ In Burp, go to the Extensions tab in the Extender tab, and add a new extension. 
 If you use IntelliJ IDEA, you can build it by following `Build` -> `Build Artifacts` -> `LazyCSRF:jar` -> `Build`.
 
 ### Command line
+
+You can build it with maven.
 
 ```
 $ mvn install
