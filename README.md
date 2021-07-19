@@ -1,9 +1,11 @@
 # LazyCSRF
+LazyCSRF is a more convenient CSRF PoC generator that runs on burp.
 
 ## Motivation
-The feature of burp that I like the most is "Generate CSRF PoC". 
+The feature of burp that I like the most is `Generate CSRF PoC`. 
 However, this does not support JSON parameters. 
-It also uses the `<form>`, so it cannot send PUT/DELETE requests. 
+It also uses the `<form>`, so it cannot send PUT/DELETE requests.
+In addition, multibyte characters that can be displayed in the burp itself are often garbled in the generated CSRF PoC.
 Those were the motivations for creating this extension.
 
 ## Features
