@@ -1,5 +1,5 @@
 # LazyCSRF
-LazyCSRF is a more convenient CSRF PoC generator that runs on burp.
+LazyCSRF is a more useful CSRF PoC generator that runs on burp.
 
 ## Motivation
 The feature of burp that I like the most is `Generate CSRF PoC`. 
