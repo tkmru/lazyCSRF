@@ -33,6 +33,7 @@ $ mvn install
 ```
 
 ## Usage
+You can generate a CSRF PoC by selecting `Extensions`->`Generate JSON CSRF PoC with Ajax` or `Generate POST PoC with Form` from the menu that opens by right-clicking on Burp.
 
 ![menu](./img/menu.png)
 
