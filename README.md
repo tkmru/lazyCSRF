@@ -16,6 +16,13 @@ Those were the motivations for creating this extension.
 - Support PUT/DELETE (only work with CORS enabled with an unrestrictive policy)
 - Support displaying multibyte characters (like Japanese)
 
+### Difference in display of multibyte characters
+
+The following image shows the difference in the display of multibyte characters between Burp's CSRF PoC generator and LazyCSRF.
+LazyCSRF can generate CSRF PoC without garbling multibyte characters that are not garbled on Burp.
+
+![display-japanese](./img/display-japanese.png)
+
 ## Installation
 
 Download the jar from [GitHub Releases](https://github.com/tkmru/lazyCSRF/releases/).
