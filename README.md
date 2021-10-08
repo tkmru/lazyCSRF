@@ -24,15 +24,16 @@ Those were the motivations for creating this extension.
 ### Difference in display of multibyte characters
 
 The following image shows the difference in the display of multibyte characters between Burp's CSRF PoC generator and LazyCSRF.
-LazyCSRF can generate CSRF PoC without garbling multibyte characters that are not garbled on Burp.
+LazyCSRF can generate PoC for CSRF without garbling multibyte characters.
+This is only the case if the characters are not garbled on Burp.
 
 ![display-japanese](./img/display-japanese.png)
 
 ## Installation
 
-Download the jar from [GitHub Releases](https://github.com/tkmru/lazyCSRF/releases/).
+Download the JAR from [GitHub Releases](https://github.com/tkmru/lazyCSRF/releases/).
 In Burp Suite, go to the Extensions tab in the Extender tab, and add a new extension. 
-Select the extension type `Java`, and specify the location of the jar.
+Select the extension type `Java`, and specify the location of the JAR.
 
 ## How to Build
 ### intellij
