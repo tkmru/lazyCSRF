@@ -1,4 +1,9 @@
 # LazyCSRF
+
+[![GitHub release](https://img.shields.io/github/v/release/tkmru/lazycsrf.svg)](https://github.com/tkmru/lazycsrf/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/tkmru/lazycsrf/blob/main/LICENSE.md)
+[![](https://img.shields.io/badge/Black%20Hat%20Arsenal-EUROPE%202021-blue.svg)](https://www.blackhat.com/eu-21/arsenal/schedule/index.html#lazycsrf-a-more-useful-csrf-poc-generator-on-burpsuite-25088)
+
 LazyCSRF is a more useful CSRF PoC generator that runs on Burp Suite.
 
 ## Motivation
