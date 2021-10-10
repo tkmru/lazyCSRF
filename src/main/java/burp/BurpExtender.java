@@ -18,7 +18,7 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
   private PrintWriter stderr;
 
   private static String EXTENSION_NAME = "LazyCSRF";
-  private static String JSON_CSRF_MENU_NAME = "Generate JSON CSRF PoC with Ajax";
+  private static String JSON_CSRF_MENU_NAME = "Generate JSON CSRF PoC with XHR";
   private static String FORM_CSRF_MENU_NAME = "Generate POST CSRF PoC with Form";
 
   @Override
@@ -114,30 +114,18 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
         .append("<!DOCTYPE html>\n")
         .append("<html>\n")
         .append("<body>\n")
-        .append(
-            "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js\"></script>\n")
+        .append("<button onclick='sendRequest()'>Submit request</button>\n")
         .append("<script>\n")
-        .append("$.ajax({\n")
-        .append("  url: '").append(url).append("',\n")
-        .append("  type: '").append(method).append("',\n")
-        .append("  contentType: 'application/json; charset=utf-8',\n")
-        .append("  xhrFields: {\n")
-        .append("    withCredentials: true\n")
-        .append("  },\n")
-        .append("  crossDomain: true,\n");
+        .append("function sendRequest() {\n")
+        .append("  var xhr = new XMLHttpRequest();\n")
+        .append("  xhr.open('").append(method).append("', '").append(url).append("');\n")
+        .append("  xhr.withCredentials = true;\n");
 
     if (isJSON(body)) {
-      PoCBuilder.append("  contentType: 'application/json; charset=utf-8',\n")
-          .append("  data: '").append(escapeParam(body));
+      PoCBuilder.append("  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');\n")
+          .append("  xhr.send('").append(escapeParam(body)).append("');\n");
     }
-    PoCBuilder.append("',\n")
-        .append("  success: function (result) {\n")
-        .append("    console.log(result);\n")
-        .append("  },\n")
-        .append("  error: function(result) {\n")
-        .append("    console.log(result);\n")
-        .append("  }\n")
-        .append("});\n")
+    PoCBuilder.append("}\n")
         .append("</script>\n")
         .append("</body>\n")
         .append("</html>\n");
