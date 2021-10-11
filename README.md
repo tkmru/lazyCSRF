@@ -16,10 +16,10 @@ Those were the motivations for creating this extension.
 
 ## Features
 
-- Generating CSRF PoC with Burp Suite Community Edition (of course, it also works in Professional Edition)
-- Support JSON parameter (like GraphQL Request)
+- Support JSON parameter (like a request to the API)
 - Support PUT/DELETE (only work with CORS enabled with an unrestrictive policy)
 - Support displaying multibyte characters (like Japanese)
+- Generating CSRF PoC with Burp Suite Community Edition (of course, it also works in Professional Edition)
 
 ### Difference in display of multibyte characters
 

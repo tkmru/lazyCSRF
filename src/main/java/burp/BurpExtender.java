@@ -18,8 +18,8 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
   private PrintWriter stderr;
 
   private static String EXTENSION_NAME = "LazyCSRF";
-  private static String JSON_CSRF_MENU_NAME = "Generate JSON CSRF PoC with XHR";
-  private static String FORM_CSRF_MENU_NAME = "Generate POST CSRF PoC with Form";
+  private static String FORM_CSRF_MENU_NAME = "Generate CSRF PoC with Form (POST)";
+  private static String XHR_CSRF_MENU_NAME = "Generate CSRF PoC with XHR (PATCH/POST/PUT/DELETE, JSON etc)";
 
   @Override
   public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -47,35 +47,6 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
         menuInvocation.getInvocationContext()
             == IContextMenuInvocation.CONTEXT_MESSAGE_EDITOR_RESPONSE
     ) {
-      JMenuItem GenerateJsonPocButton = new JMenuItem(JSON_CSRF_MENU_NAME);
-      GenerateJsonPocButton.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          if (arg0.getActionCommand().equals(JSON_CSRF_MENU_NAME)) {
-            IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
-            for (IHttpRequestResponse req : selectedMessages) {
-              IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
-              CSRFPoCWindow view = new CSRFPoCWindow(EXTENSION_NAME);
-              view.setVisible();
-              String pocText = null;
-              try {
-                pocText = GenerateJSONPoC(req, reqInfo);
-              } catch (UnsupportedEncodingException e) {
-                stderr.println("ERROR: Unsupported Encoding");
-              }
-              view.setRequestLabel(reqInfo.getUrl().toString());
-              view.setCSRFPoCHTML(pocText);
-              String reqFullText = new StringBuilder()
-                  .append(parseHeaderText(reqInfo.getHeaders()))
-                  .append(parseBodyText(req.getRequest()))
-                  .toString();
-              view.setRequest(reqFullText);
-            }
-          }
-        }
-      });
-      menuList.add(GenerateJsonPocButton);
-
       JMenuItem GenerateFormPocButton = new JMenuItem(FORM_CSRF_MENU_NAME);
       GenerateFormPocButton.addActionListener(new ActionListener() {
         @Override
@@ -99,6 +70,35 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
         }
       });
       menuList.add(GenerateFormPocButton);
+
+      JMenuItem GenerateXhrPocButton = new JMenuItem(XHR_CSRF_MENU_NAME);
+      GenerateXhrPocButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+          if (arg0.getActionCommand().equals(XHR_CSRF_MENU_NAME)) {
+            IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
+            for (IHttpRequestResponse req : selectedMessages) {
+              IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
+              CSRFPoCWindow view = new CSRFPoCWindow(EXTENSION_NAME);
+              view.setVisible();
+              String pocText = null;
+              try {
+                pocText = GenerateJSONPoC(req, reqInfo);
+              } catch (UnsupportedEncodingException e) {
+                stderr.println("ERROR: Unsupported Encoding");
+              }
+              view.setRequestLabel(reqInfo.getUrl().toString());
+              view.setCSRFPoCHTML(pocText);
+              String reqFullText = new StringBuilder()
+                  .append(parseHeaderText(reqInfo.getHeaders()))
+                  .append(parseBodyText(req.getRequest()))
+                  .toString();
+              view.setRequest(reqFullText);
+            }
+          }
+        }
+      });
+      menuList.add(GenerateXhrPocButton);
     }
     return menuList;
   }
