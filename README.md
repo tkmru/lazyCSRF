@@ -9,7 +9,7 @@ LazyCSRF is a more useful CSRF PoC generator that runs on Burp Suite.
 ## Motivation
 Burp Suite is an intercepting HTTP Proxy, and it is the defacto tool for performing web application security testing.
 The feature of Burp Suite that I like the most is `Generate CSRF PoC`. 
-However, the function to automatically determine the content of the request is broken, and it tries to generate PoCs using `form` even for PoCs that cannot be represented by `form`, such as JSON parameters and PUT requests.
+However, the function to automatically determine the content of request is broken, and it will try to generate PoC using `form` even for PoC that cannot be represented by `form`, such as cases using JSON for parameters or PUT requests.
 In addition, multibyte characters that can be displayed in Burp Suite itself are often garbled in the generated CSRF PoC.
 These were the motivations for creating LazyCSRF.
 
