@@ -17,9 +17,8 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
   private PrintWriter stdout;
   private PrintWriter stderr;
 
-  private static String EXTENSION_NAME = "LazyCSRF";
-  private static String FORM_CSRF_MENU_NAME = "Generate CSRF PoC with Form (POST)";
-  private static String XHR_CSRF_MENU_NAME = "Generate CSRF PoC with XHR (PATCH/POST/PUT/DELETE, JSON etc)";
+  private static final String EXTENSION_NAME = "LazyCSRF";
+  private static final String CSRF_MENU_NAME = "Generate CSRF PoC By LazyCSRF";
 
   @Override
   public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -47,35 +46,11 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
         menuInvocation.getInvocationContext()
             == IContextMenuInvocation.CONTEXT_MESSAGE_EDITOR_RESPONSE
     ) {
-      JMenuItem GenerateFormPocButton = new JMenuItem(FORM_CSRF_MENU_NAME);
-      GenerateFormPocButton.addActionListener(new ActionListener() {
+      JMenuItem GeneratePocButton = new JMenuItem(CSRF_MENU_NAME);
+      GeneratePocButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent arg0) {
-          if (arg0.getActionCommand().equals(FORM_CSRF_MENU_NAME)) {
-            IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
-            for (IHttpRequestResponse req : selectedMessages) {
-              IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
-              CSRFPoCWindow view = new CSRFPoCWindow(EXTENSION_NAME);
-              view.setVisible();
-              String pocText = GenerateFormPoC(req, reqInfo);
-              view.setRequestLabel(reqInfo.getUrl().toString());
-              view.setCSRFPoCHTML(pocText);
-              String reqFullText = new StringBuilder()
-                  .append(parseHeaderText(reqInfo.getHeaders()))
-                  .append(parseBodyText(req.getRequest()))
-                  .toString();
-              view.setRequest(reqFullText);
-            }
-          }
-        }
-      });
-      menuList.add(GenerateFormPocButton);
-
-      JMenuItem GenerateXhrPocButton = new JMenuItem(XHR_CSRF_MENU_NAME);
-      GenerateXhrPocButton.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-          if (arg0.getActionCommand().equals(XHR_CSRF_MENU_NAME)) {
+          if (arg0.getActionCommand().equals(CSRF_MENU_NAME)) {
             IHttpRequestResponse[] selectedMessages = menuInvocation.getSelectedMessages();
             for (IHttpRequestResponse req : selectedMessages) {
               IRequestInfo reqInfo = burpHelpers.analyzeRequest(req);
@@ -83,9 +58,9 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
               view.setVisible();
               String pocText = null;
               try {
-                pocText = GenerateJSONPoC(req, reqInfo);
+                pocText = GeneratePoC(req, reqInfo);
               } catch (UnsupportedEncodingException e) {
-                stderr.println("ERROR: Unsupported Encoding");
+                e.printStackTrace();
               }
               view.setRequestLabel(reqInfo.getUrl().toString());
               view.setCSRFPoCHTML(pocText);
@@ -98,9 +73,21 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
           }
         }
       });
-      menuList.add(GenerateXhrPocButton);
+      menuList.add(GeneratePocButton);
     }
     return menuList;
+  }
+
+  private String GeneratePoC(IHttpRequestResponse req, IRequestInfo reqInfo)
+      throws UnsupportedEncodingException {
+    String method = reqInfo.getMethod();
+    String body = new String(req.getRequest(), StandardCharsets.UTF_8)
+        .substring(reqInfo.getBodyOffset());
+    String url = reqInfo.getUrl().toString();
+    if (isJSON(body) || (!(method.equals("GET")) && !(method.equals("POST")))) {
+      return GenerateJSONPoC(req, reqInfo);
+    }
+    return GenerateFormPoC(req, reqInfo);
   }
 
   private String GenerateJSONPoC(IHttpRequestResponse req, IRequestInfo reqInfo)
