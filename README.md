@@ -49,7 +49,7 @@ $ mvn install
 ```
 
 ## Usage
-You can generate a CSRF PoC by selecting `Extensions`->`LazyCSRF`->`Generate CSRF PoC with Form` or `Generate POST PoC with XHR` from the menu that opens by right-clicking on Burp Suite.
+You can generate a CSRF PoC by selecting `Extensions`->`LazyCSRF`->`Generate CSRF PoC By LazyCSRF` from the menu that opens by right-clicking on Burp Suite.
 
 ![menu](./img/menu.png)
 
