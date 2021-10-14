@@ -123,7 +123,9 @@ public class BurpExtender implements IBurpExtender, IContextMenuFactory {
 
     if (isJSON(body)) {
       PoCBuilder.append("  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');\n")
-          .append("  xhr.send('").append(escapeParam(body)).append("');\n");
+          .append("  xhr.send(")
+          .append(escapeParam(body))
+          .append("  );\n");
     }
     PoCBuilder.append("}\n")
         .append("</script>\n")
