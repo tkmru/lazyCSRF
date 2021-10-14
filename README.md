@@ -35,6 +35,11 @@ Download the JAR from [GitHub Releases](https://github.com/tkmru/lazyCSRF/releas
 In Burp Suite, go to the Extensions tab in the Extender tab, and add a new extension. 
 Select the extension type `Java`, and specify the location of the JAR.
 
+## Usage
+You can generate a CSRF PoC by selecting `Extensions`->`LazyCSRF`->`Generate CSRF PoC By LazyCSRF` from the menu that opens by right-clicking on Burp Suite.
+
+![menu](./img/menu.png)
+
 ## How to Build
 ### intellij
 
@@ -47,11 +52,6 @@ You can build it with maven.
 ```
 $ mvn install
 ```
-
-## Usage
-You can generate a CSRF PoC by selecting `Extensions`->`LazyCSRF`->`Generate CSRF PoC By LazyCSRF` from the menu that opens by right-clicking on Burp Suite.
-
-![menu](./img/menu.png)
 
 ## LICENSE
 
